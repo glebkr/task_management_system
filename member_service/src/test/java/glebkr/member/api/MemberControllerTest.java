@@ -27,9 +27,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 import glebkr.member.config.TestCachingConfig;
 import glebkr.member.dto.MemberDTO;
+import glebkr.member.exception.MemberNotFoundException;
 import glebkr.member.model.MemberGradeEnum;
 import glebkr.member.model.MemberSpecializationEnum;
 import glebkr.member.service.MemberService;
@@ -56,7 +58,7 @@ class MemberControllerTest {
     @BeforeEach
     public void setUp() {
         memberDTO = MemberDTO.builder()
-                .id(1)
+                .id(UUID.randomUUID())
                 .name("Gleb")
                 .surname("Kuryanov")
                 .specialization(MemberSpecializationEnum.BACKEND)
@@ -65,7 +67,7 @@ class MemberControllerTest {
     }
 
     @Test
-    public void testCreateMember() throws Exception {
+    public void createMember_ShouldReturnCreatedMember_WhenValidInput() throws Exception {
         when(memberService.createMember(any(MemberDTO.class))).thenReturn(memberDTO);
 
         String memberJson = objectMapper.writeValueAsString(memberDTO);
@@ -78,9 +80,9 @@ class MemberControllerTest {
     }
 
     @Test
-    public void testGetAllMembers() throws Exception {
+    public void gelAllMembers_ShouldReturnAllMembers_WhenMembersExist() throws Exception {
         MemberDTO memberDTO1 = MemberDTO.builder()
-                .id(2)
+                .id(UUID.randomUUID())
                 .name("Ryan")
                 .surname("Gosling")
                 .specialization(MemberSpecializationEnum.ANDROID)
@@ -98,7 +100,7 @@ class MemberControllerTest {
     }
 
     @Test
-    public void testGetMember() throws Exception {
+    public void getMember_ShouldReturnMember_WhenMemberExists() throws Exception {
         when(memberService.findMemberById(memberDTO.getId())).thenReturn(memberDTO);
 
         mockMvc.perform(get("/api/v1/member/{id}", memberDTO.getId()))
@@ -109,7 +111,18 @@ class MemberControllerTest {
     }
 
     @Test
-    public void testUpdateMember() throws Exception {
+    public void getMember_ShouldThrowMemberNotFoundException_WhenNoMemberExists() throws Exception {
+        UUID nonExistedMemberId = UUID.randomUUID();
+        when(memberService.findMemberById(nonExistedMemberId)).thenThrow(new MemberNotFoundException(nonExistedMemberId));
+
+        mockMvc.perform(get("/api/v1/member/{id}", nonExistedMemberId))
+                .andExpect(status().isNotFound());
+
+        verify(memberService, times(1)).findMemberById(nonExistedMemberId);
+    }
+
+    @Test
+    public void updateMember_ShouldUpdateMember_WhenValidInput() throws Exception {
         when(memberService.updateMember(eq(memberDTO.getId()), any(MemberDTO.class))).thenReturn(memberDTO);
 
         String memberJson = objectMapper.writeValueAsString(memberDTO);
@@ -118,13 +131,13 @@ class MemberControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(memberJson))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(memberDTO.getId()));
+                .andExpect(jsonPath("$.id").value(memberDTO.getId().toString()));
 
         verify(memberService, times(1)).updateMember(eq(memberDTO.getId()), any(MemberDTO.class));
     }
 
     @Test
-    public void testDeleteMember() throws Exception {
+    public void deleteMember_ShouldReturnNoContent_WhenMemberDeleted() throws Exception {
         doNothing().when(memberService).deleteMemberById(memberDTO.getId());
 
         mockMvc.perform(delete("/api/v1/member/{id}", memberDTO.getId()))

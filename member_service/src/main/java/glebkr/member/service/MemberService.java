@@ -1,6 +1,7 @@
 package glebkr.member.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import glebkr.member.dto.MemberDTO;
 
@@ -9,10 +10,10 @@ public interface MemberService {
 
     List<MemberDTO> findAllMembers();
 
-    MemberDTO findMemberById(Integer id);
+    MemberDTO findMemberById(UUID memberId);
 
-    MemberDTO updateMember(Integer memberId, MemberDTO memberDTO);
+    MemberDTO updateMember(UUID memberId, MemberDTO memberDTO);
 
-    void deleteMemberById(Integer id);
+    void deleteMemberById(UUID memberId);
 
 }

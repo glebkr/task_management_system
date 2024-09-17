@@ -23,3 +23,6 @@ server:
     port: 6379
     redis:
       time-to-live: 60000
+kafka:
+  bootstrap-servers: localhost:9092
+  task-outbox-topic: task_outbox_topic

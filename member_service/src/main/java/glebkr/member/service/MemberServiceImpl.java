@@ -3,15 +3,15 @@ package glebkr.member.service;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import glebkr.member.dto.MemberDTO;
 import glebkr.member.entity.Member;
 import glebkr.member.exception.MemberNotFoundException;
-import glebkr.member.mapper.MemberDTOtoEntityMapping;
+import glebkr.member.mapper.MemberDTOToEntityMapping;
 import glebkr.member.mapper.MemberEntityToDTOMapping;
 import glebkr.member.repository.MemberRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -20,12 +20,12 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final MemberEntityToDTOMapping memberEntityToDTOMapping;
-    private final MemberDTOtoEntityMapping memberDTOtoEntityMapping;
+    private final MemberDTOToEntityMapping memberDTOtoEntityMapping;
 
     @Override
     public MemberDTO createMember(MemberDTO memberDTO) {
         Member member = memberDTOtoEntityMapping.mapMemberDTOtoEntity(memberDTO);
-        Member createdMember = memberRepository.saveAndFlush(member);
+        Member createdMember = memberRepository.save(member);
         return memberEntityToDTOMapping.mapMemberEntityToDto(createdMember);
     }
 
@@ -35,27 +35,26 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberDTO findMemberById(Integer memberId) {
+    public MemberDTO findMemberById(UUID memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new MemberNotFoundException(memberId));
         return memberEntityToDTOMapping.mapMemberEntityToDto(member);
     }
 
     @Override
-    @Transactional
-    public MemberDTO updateMember(Integer memberId, MemberDTO memberDTO) {
+    public MemberDTO updateMember(UUID memberId, MemberDTO memberDTO) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new MemberNotFoundException(memberId));
         member.setName(memberDTO.getName());
         member.setSurname(memberDTO.getSurname());
         member.setSpecialization(memberDTO.getSpecialization());
         member.setGrade(memberDTO.getGrade());
-        Member savedMember = memberRepository.saveAndFlush(member);
+        Member savedMember = memberRepository.save(member);
         return memberEntityToDTOMapping.mapMemberEntityToDto(savedMember);
     }
 
     @Override
-    public void deleteMemberById(Integer id) {
-        memberRepository.findById(id).orElseThrow(() -> new MemberNotFoundException(id));
-        memberRepository.deleteById(id);
+    public void deleteMemberById(UUID memberId) {
+        memberRepository.findById(memberId).orElseThrow(() -> new MemberNotFoundException(memberId));
+        memberRepository.deleteById(memberId);
     }
 
 }

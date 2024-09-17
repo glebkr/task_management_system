@@ -1,39 +1,21 @@
 package glebkr.task.service;
 
-import org.springframework.stereotype.Service;
-
-import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 
-import glebkr.task.entity.Task;
-import glebkr.task.model.TaskPriorityEnum;
+import glebkr.task.dto.TaskDTO;
 import glebkr.task.model.TaskStatusEnum;
-import glebkr.task.repository.TaskRepository;
-import lombok.RequiredArgsConstructor;
-import jakarta.annotation.PostConstruct;
 
-@Service
-@RequiredArgsConstructor
-public class TaskService {
+public interface TaskService {
+    TaskDTO createTask(TaskDTO taskDTO);
 
-    private final TaskRepository taskRepository;
+    List<TaskDTO> findAllTasks();
 
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
-    }
+    TaskDTO findTaskById(UUID taskId);
 
-    @PostConstruct
-    public void addTasks()  {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, 1);
-        Task task = Task.builder()
-                .title("add redis caching")
-                .description("you need to add redis caching for Task service")
-                .dueDate(cal.getTime())
-                .priority(TaskPriorityEnum.HIGH)
-                .status(TaskStatusEnum.OPEN)
-                .build();
-        taskRepository.save(task);
-    }
+    TaskDTO updateTask(UUID taskId, TaskDTO taskDTO);
 
+    void deleteTaskById(UUID taskId);
+
+    TaskDTO updateTaskStatus(UUID taskId, TaskDTO taskDTO);
 }

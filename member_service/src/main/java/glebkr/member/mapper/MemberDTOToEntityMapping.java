@@ -6,7 +6,7 @@ import glebkr.member.dto.MemberDTO;
 import glebkr.member.entity.Member;
 
 @Component
-public class MemberDTOtoEntityMapping {
+public class MemberDTOToEntityMapping {
     public Member mapMemberDTOtoEntity(MemberDTO member) {
         return Member.builder()
                 .name(member.getName())

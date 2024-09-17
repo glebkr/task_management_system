@@ -17,9 +17,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
+import glebkr.member.annotation.IdConstraint;
 import glebkr.member.dto.MemberDTO;
 import glebkr.member.exception.InvalidIdException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import glebkr.member.service.MemberService;
 
@@ -50,22 +53,22 @@ public class MemberController {
 
     @GetMapping("/{memberId}")
     @Cacheable(key = "#memberId", value = "members")
-    public MemberDTO getMember(@PathVariable("memberId") Integer memberId) {
-        checkId(memberId);
+    public MemberDTO getMember(@PathVariable("memberId") UUID memberId) {
+  //      checkId(memberId);
         return memberService.findMemberById(memberId);
     }
 
     @PutMapping("/{memberId}")
     @CachePut(key = "#memberId", value = "members")
-    public MemberDTO updateMember(@PathVariable("memberId") Integer memberId, @RequestBody MemberDTO memberDTO) {
-        checkId(memberId);
+    public MemberDTO updateMember(@PathVariable("memberId") UUID memberId, @RequestBody MemberDTO memberDTO) {
+   //     checkId(memberId);
         return memberService.updateMember(memberId, memberDTO);
     }
 
     @DeleteMapping("/{memberId}")
     @CacheEvict(key = "#memberId", value = "members")
-    public void deleteMember(@PathVariable("memberId") Integer memberId) {
-        checkId(memberId);
+    public void deleteMember(@PathVariable("memberId") UUID memberId) {
+    //    checkId(memberId);
         memberService.deleteMemberById(memberId);
     }
 

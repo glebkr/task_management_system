@@ -1,4 +1,4 @@
-package glebkr.member.exception;
+package glebkr.task.exception;
 
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
@@ -12,17 +12,12 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
-public class    GlobalExceptionHandler {
+public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MemberNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleMemberNotFoundException(MemberNotFoundException ex) {
+    @ExceptionHandler(TaskNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleMemberNotFoundException(TaskNotFoundException ex) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode("404")
                 .errorMessage(ex.getMessage())
@@ -75,18 +70,6 @@ public class    GlobalExceptionHandler {
                 .errorMessage(errorMessage)
                 .build();
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<Map<String, String>> handleConstraintViolationException(ConstraintViolationException ex) {
-        Map<String, String> errors = new HashMap<>();
-        Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
-        for (ConstraintViolation<?> violation : violations) {
-            String propertyPath = violation.getPropertyPath().toString();
-            String message = violation.getMessage();
-            errors.put(propertyPath, message);
-        }
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)

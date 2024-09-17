@@ -1,5 +1,7 @@
 package glebkr.member.dto;
 
+import java.util.UUID;
+
 import glebkr.member.model.MemberGradeEnum;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -13,7 +15,7 @@ import glebkr.member.model.MemberSpecializationEnum;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MemberDTO {
-    private Integer id;
+    private UUID id;
     @NotNull
     private String name;
     @NotNull

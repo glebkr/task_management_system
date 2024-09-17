@@ -4,17 +4,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import glebkr.member.entity.Member;
+import glebkr.member.exception.MemberNotFoundException;
 import glebkr.member.model.MemberGradeEnum;
 import glebkr.member.model.MemberSpecializationEnum;
 import glebkr.member.repository.MemberRepository;
@@ -31,7 +35,6 @@ public class MemberRepositoryTest {
     @BeforeEach
     public void setUp() {
         member = Member.builder()
-                .id(1)
                 .name("Gleb")
                 .surname("Kuryanov")
                 .specialization(MemberSpecializationEnum.BACKEND)
@@ -40,7 +43,7 @@ public class MemberRepositoryTest {
     }
 
     @Test
-    public void testSaveMember() {
+    public void save_ShouldPersistMember_WhenValidMember() {
         Member savedMember = memberRepository.save(member);
 
         assertThat(savedMember).isNotNull();
@@ -49,16 +52,15 @@ public class MemberRepositoryTest {
     }
 
     @Test
-    public void testGetAllMembers() {
+    public void findAll_ShouldReturnAllMembers_WhenMembersExist() {
         Member member1 = Member.builder()
-                .id(2)
                 .name("Ryan")
                 .surname("Gosling")
                 .specialization(MemberSpecializationEnum.FRONTEND)
                 .grade(MemberGradeEnum.JUNIOR)
                 .build();
 
-        memberRepository.saveAllAndFlush(List.of(member, member1));
+        memberRepository.saveAll(List.of(member, member1));
 
         List<Member> memberList = memberRepository.findAll();
 
@@ -72,8 +74,8 @@ public class MemberRepositoryTest {
     }
 
     @Test
-    public void testGetMember() {
-        Member savedMember = memberRepository.saveAndFlush(member);
+    public void getMember_ShouldReturnMember_WhenMemberExists() {
+        Member savedMember = memberRepository.save(member);
 
         Optional<Member> foundMember = memberRepository.findById(savedMember.getId());
 
@@ -83,19 +85,34 @@ public class MemberRepositoryTest {
     }
 
     @Test
-    public void testUpdateMember() {
-        Member savedMember = memberRepository.saveAndFlush(member);
+    public void getMember_ShouldReturnEmptyOptional_WhenNoMemberExists() {
+        UUID nonExistentMemberId = UUID.randomUUID();
+        Optional<Member> foundMember = memberRepository.findById(nonExistentMemberId);
 
-        savedMember.setName("Updated name");
-        Member updatedMember = memberRepository.saveAndFlush(savedMember);
-
-        assertThat(updatedMember).isNotNull();
-        assertThat(updatedMember.getId()).isNotNull();
-        assertThat(updatedMember.getName()).isEqualTo("Updated name");
+        assertFalse(foundMember.isPresent());
     }
 
     @Test
-    public void testDeleteMember() {
+    public void updateMember_ShouldUpdateMember_WhenValidMember() {
+        memberRepository.save(member);
+
+        Member savedMember = memberRepository.findById(member.getId()).orElseThrow(() -> new MemberNotFoundException(member.getId()));
+
+        savedMember.setName("Johny");
+        savedMember.setSpecialization(MemberSpecializationEnum.ANDROID);
+
+        memberRepository.save(savedMember);
+
+        Member updatedMember = memberRepository.findById(member.getId()).orElseThrow(() -> new MemberNotFoundException(member.getId()));
+
+        assertThat(updatedMember).isNotNull();
+        assertThat(updatedMember.getId()).isNotNull();
+        assertThat(updatedMember.getName()).isEqualTo("Johny");
+        assertThat(updatedMember.getSpecialization()).isEqualTo(MemberSpecializationEnum.ANDROID);
+    }
+
+    @Test
+    public void deleteById_ShouldDeleteMember_WhenMemberExists() {
         Member savedMember = memberRepository.save(member);
 
         Optional<Member> foundMember = memberRepository.findById(savedMember.getId());

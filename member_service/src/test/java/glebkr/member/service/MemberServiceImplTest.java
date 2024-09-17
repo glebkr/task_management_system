@@ -2,6 +2,7 @@ package glebkr.member.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -17,15 +18,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import glebkr.member.dto.MemberDTO;
 import glebkr.member.entity.Member;
-import glebkr.member.mapper.MemberDTOtoEntityMapping;
+import glebkr.member.exception.MemberNotFoundException;
+import glebkr.member.mapper.MemberDTOToEntityMapping;
 import glebkr.member.mapper.MemberEntityToDTOMapping;
 import glebkr.member.model.MemberGradeEnum;
 import glebkr.member.model.MemberSpecializationEnum;
 import glebkr.member.repository.MemberRepository;
-import glebkr.member.service.MemberServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class MemberServiceImplTest {
@@ -40,22 +42,24 @@ public class MemberServiceImplTest {
     private MemberEntityToDTOMapping memberEntityToDTOMapping;
 
     @Mock
-    private MemberDTOtoEntityMapping memberDTOtoEntityMapping;
+    private MemberDTOToEntityMapping memberDTOtoEntityMapping;
 
     private MemberDTO memberDTO;
     private Member member;
 
     @BeforeEach
     public void setUp() {
+        UUID memberId = UUID.randomUUID();
         memberDTO = MemberDTO.builder()
-                .id(1)
+                .id(memberId)
                 .name("Gleb")
                 .surname("Kuryanov")
                 .specialization(MemberSpecializationEnum.BACKEND)
                 .grade(MemberGradeEnum.MIDDLE)
                 .build();
+
         member = Member.builder()
-                .id(1)
+                .id(memberId)
                 .name("Gleb")
                 .surname("Kuryanov")
                 .specialization(MemberSpecializationEnum.BACKEND)
@@ -64,9 +68,9 @@ public class MemberServiceImplTest {
     }
 
     @Test
-    public void testCreateMember() {
+    public void createMember_ShouldSaveAndReturnMember_WhenValidInput() {
         when(memberDTOtoEntityMapping.mapMemberDTOtoEntity(any(MemberDTO.class))).thenReturn(member);
-        when(memberRepository.saveAndFlush(any(Member.class))).thenReturn(member);
+        when(memberRepository.save(any(Member.class))).thenReturn(member);
         when(memberEntityToDTOMapping.mapMemberEntityToDto(any(Member.class))).thenReturn(memberDTO);
 
         MemberDTO result = memberServiceImpl.createMember(memberDTO);
@@ -76,16 +80,17 @@ public class MemberServiceImplTest {
     }
 
     @Test
-    public void testGetAllMembers() {
+    public void finaAllMembers_ShouldReturnAllMembers_WhenMembersExist() {
+        UUID memberId = UUID.randomUUID();
         Member member1 = Member.builder()
-                .id(2)
+                .id(memberId)
                 .name("Ryan")
                 .surname("Gosling")
                 .specialization(MemberSpecializationEnum.FRONTEND)
                 .grade(MemberGradeEnum.JUNIOR)
                 .build();
         MemberDTO member1DTO = MemberDTO.builder()
-                .id(2)
+                .id(memberId)
                 .name("Ryan")
                 .surname("Gosling")
                 .specialization(MemberSpecializationEnum.FRONTEND)
@@ -106,7 +111,7 @@ public class MemberServiceImplTest {
     }
 
     @Test
-    public void testGetMemberById() {
+    public void findMemberById_ShouldReturnMember_WhenMemberExists() {
         when(memberRepository.findById(memberDTO.getId())).thenReturn(Optional.of(member));
         when(memberEntityToDTOMapping.mapMemberEntityToDto(any(Member.class))).thenReturn(memberDTO);
 
@@ -117,9 +122,19 @@ public class MemberServiceImplTest {
     }
 
     @Test
-    public void testUpdateMember() {
+    public void getMember_ShouldThrowMemberNotFoundException_WhenNoMemberExists() {
+        UUID nonExistentMemberId = UUID.randomUUID();
+        when(memberRepository.findById(nonExistentMemberId)).thenThrow(new MemberNotFoundException(nonExistentMemberId));
+
+        assertThrows(MemberNotFoundException.class, () ->
+                memberServiceImpl.findMemberById(nonExistentMemberId)
+        );
+    }
+
+    @Test
+    public void updateMember_ShouldUpdateMember_WhenValidInput() {
         when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
-        when(memberRepository.saveAndFlush(any(Member.class))).thenReturn(member);
+        when(memberRepository.save(any(Member.class))).thenReturn(member);
         when(memberEntityToDTOMapping.mapMemberEntityToDto(any(Member.class))).thenReturn(memberDTO);
 
         MemberDTO result = memberServiceImpl.updateMember(member.getId(), memberDTO);
@@ -129,14 +144,14 @@ public class MemberServiceImplTest {
     }
 
     @Test
-    public void testDeleteMember() {
+    public void deleteMemberById_ShouldDeleteMember_WhenMemberExists() {
         doNothing().when(memberRepository).deleteById(member.getId());
         when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
 
         memberServiceImpl.deleteMemberById(member.getId());
 
-        verify(memberRepository, times(1)).deleteById(1);
-        verify(memberRepository, times(1)).findById(1);
+        verify(memberRepository, times(1)).deleteById(member.getId());
+        verify(memberRepository, times(1)).findById(member.getId());
     }
 
 

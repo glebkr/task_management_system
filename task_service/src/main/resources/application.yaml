@@ -16,5 +16,13 @@ spring:
         hbm2ddl:
           auto: update
 server:
-  port:
-    8085
+  port: 8085
+  cache:
+    type: redis
+    host: localhost
+    port: 6379
+    redis:
+      time-to-live: 60000
+kafka:
+  bootstrap-servers: localhost:9092
+  task-outbox-topic: task_outbox_topic
