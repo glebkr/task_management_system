@@ -30,15 +30,6 @@ public class    GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(InvalidIdException.class)
-    public ResponseEntity<ErrorResponse> handleMemberNotFoundException(InvalidIdException ex) {
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .errorCode("400")
-                .errorMessage(ex.getMessage())
-                .build();
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
-
     @ExceptionHandler(HttpClientErrorException.BadRequest.class)
     public ResponseEntity<ErrorResponse> handleBadRequestException(HttpClientErrorException.BadRequest ex) {
         ErrorResponse errorResponse = ErrorResponse.builder()

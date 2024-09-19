@@ -9,13 +9,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.List;
+
+import glebkr.task.dto.TaskDTO;
 
 @Configuration
 public class CacheConfig {
@@ -30,14 +31,30 @@ public class CacheConfig {
 
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+        Jackson2JsonRedisSerializer<TaskDTO> taskDTOSerializer =
+                new Jackson2JsonRedisSerializer<>(objectMapper(), TaskDTO.class);
+
+        Jackson2JsonRedisSerializer<List<TaskDTO>> listSerializer =
+                new Jackson2JsonRedisSerializer<>(objectMapper(), objectMapper().getTypeFactory()
+                        .constructCollectionType(List.class, TaskDTO.class));
+
         RedisCacheConfiguration cacheConfig = RedisCacheConfiguration
                 .defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(20))
-                .disableCachingNullValues()
-                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new Jackson2JsonRedisSerializer<>(objectMapper(), Object.class)));
-        return RedisCacheManager.builder(redisConnectionFactory)
-                .cacheDefaults(cacheConfig).build();
+                .disableCachingNullValues();
+
+        RedisCacheManager.RedisCacheManagerBuilder builder = RedisCacheManager.builder(redisConnectionFactory)
+                .withCacheConfiguration("task", cacheConfig
+                        .serializeValuesWith(RedisSerializationContext
+                                .SerializationPair
+                                .fromSerializer(taskDTOSerializer)))
+                .withCacheConfiguration("tasks", cacheConfig
+                        .serializeValuesWith(RedisSerializationContext
+                                .SerializationPair
+                                .fromSerializer(listSerializer)));
+
+        return builder.build();
     }
+
 
 }

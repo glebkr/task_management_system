@@ -65,7 +65,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskDTO updateTaskStatus(UUID taskId, TaskDTO taskDTO) {
+    public TaskDTO updateTaskPartially(UUID taskId, TaskDTO taskDTO) {
         Task foundTask = taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
 
         if (taskDTO.getTitle() != null) {

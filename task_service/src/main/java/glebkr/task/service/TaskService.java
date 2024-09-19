@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 
 import glebkr.task.dto.TaskDTO;
-import glebkr.task.model.TaskStatusEnum;
 
 public interface TaskService {
     TaskDTO createTask(TaskDTO taskDTO);
@@ -17,5 +16,5 @@ public interface TaskService {
 
     void deleteTaskById(UUID taskId);
 
-    TaskDTO updateTaskStatus(UUID taskId, TaskDTO taskDTO);
+    TaskDTO updateTaskPartially(UUID taskId, TaskDTO taskDTO);
 }

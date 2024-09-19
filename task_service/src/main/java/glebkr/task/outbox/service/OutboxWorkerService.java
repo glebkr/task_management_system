@@ -22,7 +22,7 @@ public class OutboxWorkerService {
     @Value("${kafka.task-outbox-topic}")
     private String taskOutboxTopic;
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 50000)
     public void pollOutboxMessagesAndPublish() {
         List<Outbox> outboxList = outboxRepository.findByIsProcessedFalse();
 

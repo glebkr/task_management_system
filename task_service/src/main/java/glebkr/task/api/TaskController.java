@@ -1,9 +1,11 @@
 package glebkr.task.api;
 
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +22,6 @@ import java.util.List;
 import java.util.UUID;
 
 import glebkr.task.dto.TaskDTO;
-import glebkr.task.exception.InvalidIdException;
 import glebkr.task.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,52 +36,46 @@ public class TaskController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @CacheEvict(key = "'allTasks'", value = "tasks")
     public TaskDTO createTask(@Valid @RequestBody TaskDTO taskDTO) {
         TaskDTO createdTask = taskService.createTask(taskDTO);
-        /*
-        Cache cache = cacheManager.getCache("tasks");
+        Cache cache = cacheManager.getCache("task");
         if (cache != null) {
             cache.put(createdTask.getId(), createdTask);
-        }*/
+        }
         return createdTask;
     }
 
     @GetMapping
-    @Cacheable(value = "tasks")
+    @Cacheable(key = "'allTasks'", value = "tasks")
     public List<TaskDTO> getAllTasks() {
         return taskService.findAllTasks();
     }
 
     @GetMapping("/{taskId}")
-    @Cacheable(key = "#taskId", value = "tasks")
+    @Cacheable(key = "#taskId", value = "task")
     public TaskDTO getTask(@PathVariable("taskId") UUID taskId) {
-      //  checkId(taskId);
         return taskService.findTaskById(taskId);
     }
 
     @PutMapping("/{taskId}")
-    @CachePut(key = "#taskId", value = "tasks")
+    @Caching(put = @CachePut(key = "#taskId", value = "task"),
+            evict = @CacheEvict(key = "'allTasks'", value = "tasks"))
     public TaskDTO updateTask(@PathVariable("taskId") UUID taskId, @Valid @RequestBody TaskDTO taskDTO) {
-        //checkId(taskId);
         return taskService.updateTask(taskId, taskDTO);
     }
 
     @PatchMapping("/{taskId}")
+    @Caching(put = @CachePut(key = "#taskId", value = "task"),
+            evict = @CacheEvict(key = "'allTasks'", value = "tasks"))
     public TaskDTO updateTaskStatus(@PathVariable("taskId") UUID taskId, @RequestBody TaskDTO taskDTO) {
-        return taskService.updateTaskStatus(taskId, taskDTO);
+        return taskService.updateTaskPartially(taskId, taskDTO);
     }
 
     @DeleteMapping("/{taskId}")
-    @CacheEvict(key = "#taskId", value = "tasks")
+    @Caching(evict = {@CacheEvict(key = "#taskId", value = "task"), @CacheEvict(key = "'allTasks'", value = "tasks")})
     public void deleteTask(@PathVariable("taskId") UUID taskId) {
-      //  checkId(taskId);
         taskService.deleteTaskById(taskId);
-    }
-
-    private void checkId(Integer taskId) {
-        if (taskId == null || taskId <= 0) {
-            throw new InvalidIdException();
-        }
     }
 
 }

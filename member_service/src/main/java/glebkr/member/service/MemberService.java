@@ -16,4 +16,5 @@ public interface MemberService {
 
     void deleteMemberById(UUID memberId);
 
+    MemberDTO updateMemberPartially(UUID memberId, MemberDTO memberDTO);
 }

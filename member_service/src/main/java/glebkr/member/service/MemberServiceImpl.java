@@ -52,6 +52,27 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public MemberDTO updateMemberPartially(UUID memberId, MemberDTO memberDTO) {
+        Member foundMember = memberRepository.findById(memberId).orElseThrow(() -> new MemberNotFoundException(memberId));
+
+        if (memberDTO.getName() != null) {
+            foundMember.setName(memberDTO.getName());
+        }
+        if (memberDTO.getSurname() != null) {
+            foundMember.setSurname(memberDTO.getSurname());
+        }
+        if (memberDTO.getGrade() != null) {
+            foundMember.setGrade(memberDTO.getGrade());
+        }
+        if (memberDTO.getSpecialization() != null) {
+            foundMember.setSpecialization(memberDTO.getSpecialization());
+        }
+
+        Member savedMember = memberRepository.save(foundMember);
+        return memberEntityToDTOMapping.mapMemberEntityToDto(savedMember);
+    }
+
+    @Override
     public void deleteMemberById(UUID memberId) {
         memberRepository.findById(memberId).orElseThrow(() -> new MemberNotFoundException(memberId));
         memberRepository.deleteById(memberId);
