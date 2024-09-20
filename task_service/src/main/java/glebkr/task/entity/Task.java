@@ -1,5 +1,7 @@
 package glebkr.task.entity;
 
+import org.springframework.cglib.core.Local;
+
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -41,5 +43,7 @@ public class Task {
     private TaskStatusEnum status;
     @NotNull
     private LocalDate dueDate;
+    private LocalDate startDate;
+    private LocalDate resolvingDate;
 
 }

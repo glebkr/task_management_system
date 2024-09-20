@@ -3,6 +3,7 @@ package glebkr.task.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 import glebkr.task.dto.TaskDTO;
 import glebkr.task.entity.Task;
 import glebkr.task.exception.TaskNotFoundException;
+import glebkr.task.exception.UnknownTaskStatusException;
 import glebkr.task.mapper.TaskDTOToEntityMapping;
 import glebkr.task.mapper.TaskEntityToDTOMapping;
 import glebkr.task.mapper.TaskEntityToOutboxEntityMapping;
@@ -53,6 +55,12 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public List<TaskDTO> findTasksByInterval(LocalDate startDate, LocalDate endDate) {
+        List<Task> foundTasksByInterval = taskRepository.findBetweenStartDateAndCompleteDate(startDate, endDate);
+        return foundTasksByInterval.stream().map(taskEntityToDTOMapping::mapTaskEntityToDto).collect(Collectors.toList());
+    }
+
+    @Override
     public TaskDTO updateTask(UUID taskId, TaskDTO taskDTO) {
         Task foundTask = taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
         foundTask.setTitle(taskDTO.getTitle());
@@ -86,6 +94,33 @@ public class TaskServiceImpl implements TaskService {
 
         Task savedTask = taskRepository.save(foundTask);
         return taskEntityToDTOMapping.mapTaskEntityToDto(savedTask);
+    }
+
+    @Override
+    public TaskDTO updateTaskStatus(UUID taskId, TaskStatusEnum newStatus) {
+        Task foundTask = taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
+
+        switch (newStatus) {
+            case OPEN -> {
+                foundTask.setStatus(newStatus);
+                break;
+            }
+            case IN_PROGRESS -> {
+                foundTask.setStatus(newStatus);
+                foundTask.setStartDate(LocalDate.now());
+                break;
+            }
+            case RESOLVED -> {
+                foundTask.setStatus(newStatus);
+                foundTask.setResolvingDate(LocalDate.now());
+                break;
+            }
+            default -> throw new UnknownTaskStatusException(newStatus);
+        }
+
+        Task updatedTask = taskRepository.save(foundTask);
+
+        return taskEntityToDTOMapping.mapTaskEntityToDto(updatedTask);
     }
 
     @Override

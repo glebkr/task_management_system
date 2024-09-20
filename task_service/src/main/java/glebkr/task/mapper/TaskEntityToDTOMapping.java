@@ -13,9 +13,11 @@ public class TaskEntityToDTOMapping {
                 .title(task.getTitle())
                 .description(task.getDescription())
                 .memberId(task.getMemberId())
-                .dueDate(task.getDueDate())
                 .priority(task.getPriority())
                 .status(task.getStatus())
+                .dueDate(task.getDueDate())
+                .startDate(task.getStartDate())
+                .resolvingDate(task.getResolvingDate())
                 .build();
     }
 }

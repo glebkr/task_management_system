@@ -29,4 +29,6 @@ public class TaskDTO {
     private TaskStatusEnum status;
     @NotNull
     private LocalDate dueDate;
+    private LocalDate startDate;
+    private LocalDate resolvingDate;
 }

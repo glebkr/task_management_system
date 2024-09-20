@@ -2,6 +2,8 @@ package glebkr.task.mapper;
 
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+
 import glebkr.task.dto.TaskDTO;
 import glebkr.task.entity.Task;
 
@@ -12,9 +14,11 @@ public class TaskDTOToEntityMapping {
                 .title(taskDto.getTitle())
                 .description(taskDto.getDescription())
                 .memberId(taskDto.getMemberId())
-                .dueDate(taskDto.getDueDate())
                 .priority(taskDto.getPriority())
                 .status(taskDto.getStatus())
+                .dueDate(taskDto.getDueDate())
+                .startDate(taskDto.getStartDate())
+                .resolvingDate(taskDto.getResolvingDate())
                 .build();
     }
 }

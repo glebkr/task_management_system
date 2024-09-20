@@ -15,13 +15,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
 import glebkr.task.dto.TaskDTO;
+import glebkr.task.model.TaskStatusEnum;
 import glebkr.task.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +61,11 @@ public class TaskController {
         return taskService.findTaskById(taskId);
     }
 
+    @GetMapping("/byInterval")
+    public List<TaskDTO> getTasksByInterval(@RequestParam("startDate") LocalDate startDate, @RequestParam("resolvingDate") LocalDate resolvingDate) {
+        return taskService.findTasksByInterval(startDate, resolvingDate);
+    }
+
     @PutMapping("/{taskId}")
     @Caching(put = @CachePut(key = "#taskId", value = "task"),
             evict = @CacheEvict(key = "'allTasks'", value = "tasks"))
@@ -68,8 +76,15 @@ public class TaskController {
     @PatchMapping("/{taskId}")
     @Caching(put = @CachePut(key = "#taskId", value = "task"),
             evict = @CacheEvict(key = "'allTasks'", value = "tasks"))
-    public TaskDTO updateTaskStatus(@PathVariable("taskId") UUID taskId, @RequestBody TaskDTO taskDTO) {
+    public TaskDTO updateTaskPartially(@PathVariable("taskId") UUID taskId, @RequestBody TaskDTO taskDTO) {
         return taskService.updateTaskPartially(taskId, taskDTO);
+    }
+
+    @PatchMapping("/{taskId}/status")
+    @Caching(put = @CachePut(key = "#taskId", value = "task"),
+            evict = @CacheEvict(key = "'allTasks'", value = "tasks"))
+    public TaskDTO updateTaskStatus(@PathVariable("taskId") UUID taskId, @RequestParam("newStatus") TaskStatusEnum newStatus) {
+        return taskService.updateTaskStatus(taskId, newStatus);
     }
 
     @DeleteMapping("/{taskId}")
