@@ -1,6 +1,7 @@
 package glebkr.task.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import glebkr.task.model.TaskPriorityEnum;
@@ -27,8 +28,8 @@ public class TaskDTO {
     private TaskPriorityEnum priority;
     @NotNull
     private TaskStatusEnum status;
-    @NotNull
-    private LocalDate dueDate;
-    private LocalDate startDate;
-    private LocalDate resolvingDate;
+    private LocalDateTime createDate;
+    private LocalDateTime dueDate;
+    private LocalDateTime startDate;
+    private LocalDateTime resolvingDate;
 }

@@ -16,6 +16,7 @@ public class TaskDTOToEntityMapping {
                 .memberId(taskDto.getMemberId())
                 .priority(taskDto.getPriority())
                 .status(taskDto.getStatus())
+                .createDate(taskDto.getCreateDate())
                 .dueDate(taskDto.getDueDate())
                 .startDate(taskDto.getStartDate())
                 .resolvingDate(taskDto.getResolvingDate())

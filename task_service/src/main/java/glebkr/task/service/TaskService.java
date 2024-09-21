@@ -1,9 +1,11 @@
 package glebkr.task.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import glebkr.task.dto.TaskAnalyticsDTO;
 import glebkr.task.dto.TaskDTO;
 import glebkr.task.model.TaskStatusEnum;
 
@@ -12,9 +14,13 @@ public interface TaskService {
 
     List<TaskDTO> findAllTasks();
 
-    TaskDTO findTaskById(UUID taskId);
+    List<TaskDTO> findTasksByInterval(LocalDateTime startDate, LocalDateTime endDate);
 
-    List<TaskDTO> findTasksByInterval(LocalDate startDate, LocalDate resolvingDate);
+    List<TaskAnalyticsDTO> getTaskAnalyticsByInterval(LocalDateTime startDate, LocalDateTime endDate);
+
+    List<TaskAnalyticsDTO> getTaskAnalyticsByMemberId(UUID memberId);
+
+    TaskDTO findTaskById(UUID taskId);
 
     TaskDTO updateTask(UUID taskId, TaskDTO taskDTO);
 
@@ -23,5 +29,6 @@ public interface TaskService {
     TaskDTO updateTaskStatus(UUID taskId, TaskStatusEnum newStatus);
 
     void deleteTaskById(UUID taskId);
+
 
 }

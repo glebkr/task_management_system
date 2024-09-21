@@ -15,6 +15,7 @@ public class TaskEntityToDTOMapping {
                 .memberId(task.getMemberId())
                 .priority(task.getPriority())
                 .status(task.getStatus())
+                .createDate(task.getCreateDate())
                 .dueDate(task.getDueDate())
                 .startDate(task.getStartDate())
                 .resolvingDate(task.getResolvingDate())

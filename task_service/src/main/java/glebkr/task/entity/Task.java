@@ -3,10 +3,12 @@ package glebkr.task.entity;
 import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import glebkr.task.model.TaskPriorityEnum;
 import glebkr.task.model.TaskStatusEnum;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -33,6 +35,7 @@ public class Task {
     private UUID id;
     @NotEmpty
     private String title;
+    @Column(length = 500)
     private String description;
     private UUID memberId;
     @Enumerated(EnumType.STRING)
@@ -41,9 +44,9 @@ public class Task {
     @Enumerated(EnumType.STRING)
     @NotNull
     private TaskStatusEnum status;
-    @NotNull
-    private LocalDate dueDate;
-    private LocalDate startDate;
-    private LocalDate resolvingDate;
+    private LocalDateTime createDate;
+    private LocalDateTime dueDate;
+    private LocalDateTime startDate;
+    private LocalDateTime resolvingDate;
 
 }
